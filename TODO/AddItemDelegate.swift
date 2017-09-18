@@ -10,5 +10,5 @@ import Foundation
 import UIKit
 
 protocol addItemDelegate {
-    func addItemToTODOList(by: AddItemViewController, title : String, description : String, date: String )
+    func addItemToTODOList(by: AddItemViewController, title : String, description : String, date: Date )
 }

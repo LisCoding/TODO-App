@@ -7,19 +7,22 @@
 //
 
 import UIKit
+import CoreData
 
 class ToDoViewController: UITableViewController, addItemDelegate {
-    var todos = [["Cook", "tasty food for baby", "12/23/17"],["study Recursion", "ITs good for me", "3/12/17"]]
-
+    
+    //todos is an arr of instance of TodoList Objects
+    var todos = [TodoList]()
+    
+    //MOC instance (coreData)
+    let ManageObjectContext =  (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+       fetchAllItems()
+//       deleteAllRecords()
         print("its working")
         // Do any additional setup after loading the view, typically from a nib.
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -27,16 +30,36 @@ class ToDoViewController: UITableViewController, addItemDelegate {
     }
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "customCell") as? CustomCell
-        cell?.titleLabel.text = todos[indexPath.row][0]
-        cell?.descriptionLabel.text = todos[indexPath.row][1]
-        cell?.dateLabel.text = todos[indexPath.row][2]
+        cell?.titleLabel.text = todos[indexPath.row].title
+        cell?.descriptionLabel.text = todos[indexPath.row].note
+        let dateS = todos[indexPath.row].date
+        //convert date into str
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "dd/MM/yyyy"
+        let dateString = dateFormatter.string(from: dateS! as Date)
+        cell?.dateLabel.text = dateString
+    
+//
+    
         return cell!
         
     }
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    
         
         //add check mark when the user type the cell
         tableView.cellForRow(at: indexPath)?.accessoryType = UITableViewCellAccessoryType.checkmark
+          let item = NSEntityDescription.insertNewObject(forEntityName: "TodoList", into: ManageObjectContext)  as! TodoList
+        item.check = true
+        do {
+            
+            try ManageObjectContext.save()
+            
+        } catch {
+            print("\(error)")
+        }
+        tableView.reloadData()
+       
     }
     
     //********prepare for segue
@@ -46,10 +69,52 @@ class ToDoViewController: UITableViewController, addItemDelegate {
     }
     
     //Conform add protocol function
-    func addItemToTODOList(by: AddItemViewController, title: String, description: String, date: String) {
-        todos.append([title, description, date])
+    func addItemToTODOList(by: AddItemViewController, title: String, description: String, date: Date) {
+        let item = NSEntityDescription.insertNewObject(forEntityName: "TodoList", into: ManageObjectContext)  as! TodoList
+        item.title = title
+        item.note = description
+        item.date = date as NSDate
+        todos.append(item)
+        
+        do {
+            
+            try ManageObjectContext.save()
+            
+        } catch {
+            print("\(error)")
+        }
         tableView.reloadData()
         dismiss(animated: true, completion: nil )
+    }
+    
+    //fetch data from the database
+    func fetchAllItems() {
+        let request = NSFetchRequest<NSFetchRequestResult>(entityName: "TodoList")
+        do {
+            //fetching the data from the dataBase and putting into the todos array
+            let result = try ManageObjectContext.fetch(request)
+            todos = result as! [TodoList]
+            
+        } catch {
+            print("\(error)")
+        }
+    }
+    
+    
+    //delete data from CoreData
+    func deleteAllRecords() {
+        let delegate = UIApplication.shared.delegate as! AppDelegate
+        let context = delegate.persistentContainer.viewContext
+        
+        let deleteFetch = NSFetchRequest<NSFetchRequestResult>(entityName: "TodoList")
+        let deleteRequest = NSBatchDeleteRequest(fetchRequest: deleteFetch)
+        
+        do {
+            try context.execute(deleteRequest)
+            try context.save()
+        } catch {
+            print ("There was an error")
+        }
     }
 
 }

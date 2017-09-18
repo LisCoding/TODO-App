@@ -7,40 +7,33 @@
 //
 
 import UIKit
+import CoreData
+
 
 class AddItemViewController: UIViewController {
 
     @IBOutlet weak var titleLabel: UITextField!
-    
-    
     @IBOutlet weak var notesLabel: UITextField!
-    
     @IBOutlet weak var dateLabel: UIDatePicker!
-    
+
     var delegate : addItemDelegate?
     
+    //MOC instance (coreData)
+    let ManageObjectContext =  (UIApplication.shared.delegate as! AppDelegate).persistentContainer.viewContext
+    
     @IBAction func addItemButtonWasPressed(_ sender: UIButton) {
-        //format the date
-        let myDate = dateLabel.date
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "dd/MM/yyyy"
-        let dateString = dateFormatter.string(from:myDate)
+        
+
         //calling the delegate
-        delegate?.addItemToTODOList(by: self, title: titleLabel.text!, description: notesLabel.text!, date: dateString)
+        delegate?.addItemToTODOList(by: self, title: titleLabel.text!, description: notesLabel.text!, date: dateLabel.date)
        
-    }
-    override func viewDidLoad() {
-        super.viewDidLoad()
-       
-
-        // Do any additional setup after loading the view.
-    }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
     }
     
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+    }
+
 
 
 }
