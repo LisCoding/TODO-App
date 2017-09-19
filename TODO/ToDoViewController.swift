@@ -29,28 +29,29 @@ class ToDoViewController: UITableViewController, addItemDelegate {
         return todos.count
     }
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let todo = todos[indexPath.row]
         let cell = tableView.dequeueReusableCell(withIdentifier: "customCell") as? CustomCell
-        cell?.titleLabel.text = todos[indexPath.row].title
-        cell?.descriptionLabel.text = todos[indexPath.row].note
-        let dateS = todos[indexPath.row].date
+        cell?.titleLabel.text = todo.title
+        cell?.descriptionLabel.text = todo.note
+        let dateS = todo.date
+    
         //convert date into str
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "dd/MM/yyyy"
         let dateString = dateFormatter.string(from: dateS! as Date)
         cell?.dateLabel.text = dateString
-    
-//
-    
+        cell?.accessoryType = todo.check ? .checkmark : .none
+
         return cell!
         
     }
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
     
-        
         //add check mark when the user type the cell
         tableView.cellForRow(at: indexPath)?.accessoryType = UITableViewCellAccessoryType.checkmark
-          let item = NSEntityDescription.insertNewObject(forEntityName: "TodoList", into: ManageObjectContext)  as! TodoList
-        item.check = true
+        let todo = todos[indexPath.row]
+        todo.check = !todo.check
+        //REFACTOR FOR BABY
         do {
             
             try ManageObjectContext.save()
@@ -99,7 +100,6 @@ class ToDoViewController: UITableViewController, addItemDelegate {
             print("\(error)")
         }
     }
-    
     
     //delete data from CoreData
     func deleteAllRecords() {
