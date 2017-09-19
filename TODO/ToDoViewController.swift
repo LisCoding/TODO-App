@@ -20,8 +20,6 @@ class ToDoViewController: UITableViewController, addItemDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
        fetchAllItems()
-//       deleteAllRecords()
-        print("its working")
         // Do any additional setup after loading the view, typically from a nib.
     }
 
